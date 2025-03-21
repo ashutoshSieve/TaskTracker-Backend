@@ -43,7 +43,7 @@ app.get('/auth/callback',
       res.cookie("jwt", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "Strict",
+          sameSite: "None",
           maxAge: 24 * 60 * 60 * 1000
       });
 
@@ -197,8 +197,7 @@ app.post("/signup", async(req,res) =>{
        res.cookie("jwt", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "Strict",
-          maxAge: 24 * 60 * 60 * 1000
+          sameSite: "None"
       });
     
 
@@ -222,8 +221,7 @@ app.post("/login", async(req,res) =>{
         res.cookie("jwt", token, {
               httpOnly: true,
               secure: process.env.NODE_ENV === "production",
-              sameSite: "Strict",
-              maxAge: 24 * 60 * 60 * 1000
+              sameSite: "None"
         });
 
         res.status(200).json({ message: "User logged in successfully!" });
