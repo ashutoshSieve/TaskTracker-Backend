@@ -17,7 +17,7 @@ const monthMap = {
 };
 
 app.use(cors({
-    origin: ["http://localhost:3000"],
+    origin: ["https://task-tracker-app20.netlify.app"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
