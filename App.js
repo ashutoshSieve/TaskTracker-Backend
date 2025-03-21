@@ -47,7 +47,7 @@ app.get('/auth/callback',
           maxAge: 24 * 60 * 60 * 1000
       });
 
-      res.redirect("http://localhost:3000/main");
+      res.redirect("https://task-tracker-app20.netlify.app/main");
   }
 );
 
