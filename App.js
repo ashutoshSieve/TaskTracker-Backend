@@ -195,10 +195,11 @@ app.post("/signup", async(req,res) =>{
        const token = generateJWT({ id: newUser._id, email: newUser.email, name: newUser.name});
 
        res.cookie("jwt", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production" ? true : false, // Secure only in production
-            sameSite: "Lax"
-       });
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+          maxAge: 24 * 60 * 60 * 1000
+      });
     
 
         res.status(201).json({ message: "User created successfully!", token });
@@ -218,7 +219,12 @@ app.post("/login", async(req,res) =>{
 
         const token = generateJWT({ id: existUser._id, name: existUser.name, email: existUser.email });
 
-        res.cookie('jwt', token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "Strict" });
+        res.cookie("jwt", token, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: "Strict",
+              maxAge: 24 * 60 * 60 * 1000
+        });
 
         res.status(200).json({ message: "User logged in successfully!" });
     } catch (error) {
