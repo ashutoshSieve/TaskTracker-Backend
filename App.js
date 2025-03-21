@@ -17,7 +17,7 @@ const monthMap = {
 };
 
 app.use(cors({
-    origin: ["http://localhost:3000"],
+    origin: ["https://task-tracker-app20.netlify.app/"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -47,7 +47,7 @@ app.get('/auth/callback',
           maxAge: 24 * 60 * 60 * 1000
       });
 
-      res.redirect("http://localhost:3000/main");
+      res.redirect("https://task-tracker-app20.netlify.app/main");
   }
 );
 
