@@ -445,26 +445,24 @@ app.put("/updateMonthHeading/:taskId", jsonwebtoken, async (req, res) => {
 
 
 
-
-
 app.put("/notepadAdd", jsonwebtoken, async (req, res) => {
     try {
         const user = await User.findById(req.payload.id);
-        const { text } = req.body;
-
-        if (!text) {
-            return res.status(400).json({ success: false, message: "There is nothing to add" });
-        }
+        const { text, firstText } = req.body;
+        
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        
-        user.notePad = (user.notePad ? user.notePad + "\n" : "") + text;
+        if (!text.trim()) {
+            user.notePad = "";
+        } else {
+            user.notePad = text.trim();
+        }
 
-        await user.save(); 
+        await user.save();
 
-        res.json({ success: true, message: "Note added successfully!", notePad: user.notePad });
+        res.json({ success: true, message: "Note updated successfully!", notePad: user.notePad });
     } catch (error) {
         console.error("Error updating notepad:", error);
         res.status(500).json({ success: false, message: "Server error", error });
