@@ -9,19 +9,19 @@ mongoose.connect(process.env.URL_DB)
 
   
 const WorkSchema = new mongoose.Schema({
-    date: { type: Date, required: true }, // Store date properly
+    date: { type: Date, required: true }, 
     details: [{
-        text: { type: String},  // Ensure `text` is stored as a string
+        text: { type: String},  
         isComplete: { type: Boolean, default: false }
     }]
 });
 
 
 const TaskSchema = new mongoose.Schema({
-    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },  // Ensure _id is generated
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },  
     name: String,
-    sd: String,  // Start Date
-    ed: String,   // End Date
+    sd: String,  
+    ed: String,  
     monthHeading: { type: String, default: "Task Overview" },
     work: [WorkSchema]
 });
@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     email: String,
     password: String,
     tasks: {
-        onGoing: [TaskSchema],  // Use TaskSchema with auto _id
+        onGoing: [TaskSchema],  
         completed: []
     },
     notePad: String
