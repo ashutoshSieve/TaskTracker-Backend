@@ -3,7 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { jsonwebtoken, generateJWT } = require("./Jwt"); // Fixed import
+const { jsonwebtoken, generateJWT } = require("./Jwt"); 
 const passport = require("passport");
 const User = require("./User");
 const mongoose=require("mongoose");
@@ -51,7 +51,7 @@ app.get('/auth/callback',
   }
 );
 
-// 🔹 Verify JWT Token Route
+
 app.get("/verify-token", jsonwebtoken, (req, res) => {
     res.status(200).json({ message: "Token is valid", user: req.payload });
 });
@@ -83,7 +83,7 @@ app.get("/details/:ID", jsonwebtoken, async (req, res) => {
             return res.status(404).json({ message: "Task not found" });
         }
 
-        // Find task in user's onGoing or completed tasks
+        
         let findTask = user.tasks.onGoing.find(task => task._id.toString() === req.params.ID) || 
                        user.tasks.completed.find(task => task._id.toString() === req.params.ID);
 
@@ -121,7 +121,7 @@ app.get("/onGoings", jsonwebtoken, async (req, res) => {
         }
 
         const tasks = user.tasks.onGoing.map(task => ({
-            _id: task._id || new mongoose.Types.ObjectId(),  // Ensure _id exists
+            _id: task._id || new mongoose.Types.ObjectId(), 
             name: task.name,
             sd: task.sd,
             ed: task.ed
@@ -144,7 +144,7 @@ app.post("/create", jsonwebtoken, async (req, res) => {
         const { taskName, startDate, endDate } = req.body;
 
         const newTask = {
-            _id: new mongoose.Types.ObjectId(),  // Ensure _id is assigned
+            _id: new mongoose.Types.ObjectId(),  
             name: taskName,
             sd: startDate,
             ed: endDate
@@ -231,7 +231,7 @@ app.post("/login", async(req,res) =>{
 });
 
 
-// daily tasks 
+
 
 app.get("/workDetail/:id", jsonwebtoken, async (req, res) => {
     try {
@@ -241,10 +241,10 @@ app.get("/workDetail/:id", jsonwebtoken, async (req, res) => {
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Convert query params into a proper Date format
+        
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
-        // Check tasks in both onGoing and completed
+        
         let workDetails = [];
 
         const allTasks = [...user.tasks.onGoing, ...user.tasks.completed];
@@ -252,7 +252,7 @@ app.get("/workDetail/:id", jsonwebtoken, async (req, res) => {
             const workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
             if (workEntry) {
                 workDetails = workEntry.details;
-                break; // Exit loop once we find the work details
+                break; 
             }
         }
         res.json({ work: workDetails });
@@ -265,30 +265,27 @@ app.post("/addTask", jsonwebtoken, async (req, res) => {
     try {
         const { id, date, month, year, taskText } = req.body;
 
-        // Validate user
+        
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Find the ongoing task inside the user's tasks
+       
         const task = user.tasks.onGoing.id(id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-        // Convert date into proper format
+        
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
-        // Find if the work entry for the given date exists
+        
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
 
         if (!workEntry) {
-            // Create a new work entry if the date doesn't exist
             workEntry = { date: formattedDate, details: [{ text: taskText, isComplete: false }] };
             task.work.push(workEntry);
         } else {
-            // If the date exists, add the task to `details`
             workEntry.details.push({ text: taskText, isComplete: false });
         }
 
-        // Save the updated user document
         await user.save();
         res.status(201).json({ message: "Task added successfully", task });
 
@@ -305,14 +302,14 @@ app.put("/updateTask", jsonwebtoken, async (req, res) => {
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Find the task inside the user's ongoing tasks
+        
         const task = user.tasks.onGoing.id(id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-        // Convert date into correct format
+        
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
-        // Find the work entry for the given date
+        
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
 
         if (workEntry) {
@@ -338,21 +335,20 @@ app.delete("/deleteTask", jsonwebtoken, async (req, res) => {
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // Find the task inside the user's ongoing tasks
+        
         const task = user.tasks.onGoing.id(id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-        // Convert date into correct format
+       
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
-        // Find the work entry for the given date
+       
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
 
         if (workEntry) {
-            // Remove the task from the details array
             workEntry.details = workEntry.details.filter(task => task.text !== taskText);
 
-            // If the details array is empty, remove the entire work entry
+           
             if (workEntry.details.length === 0) {
                 task.work = task.work.filter(w => w.date.toISOString().split('T')[0] !== formattedDate.toISOString().split('T')[0]);
             }
@@ -375,37 +371,37 @@ app.put("/toggleTaskCompletion", jsonwebtoken, async (req, res) => {
             return res.status(400).json({ error: "Missing required fields." });
         }
 
-        // Get user from JWT token
+        
         const user = await User.findById(req.payload.id);
         if (!user) {
             return res.status(404).json({ error: "User not found." });
         }
 
-        // Find the task in the user's ongoing tasks
+        
         const task = user.tasks.onGoing.id(id);
         if (!task) {
             return res.status(404).json({ error: "Task not found." });
         }
 
-        // Convert `date` to correct format for comparison
+       
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
         
-        // Find the corresponding work entry for the given date
+        
         const workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
         if (!workEntry) {
             return res.status(404).json({ error: "Work entry not found for the given date." });
         }
 
-        // Find the specific task in `details`
+        
         const taskDetail = workEntry.details.find(detail => detail.text === taskText);
         if (!taskDetail) {
             return res.status(404).json({ error: "Task text not found in work details." });
         }
 
-        // Toggle completion status
+       
         taskDetail.isComplete = completed;
 
-        // Save changes
+        
         await user.save();
         res.status(200).json({ message: "Task completion status updated successfully." });
     } catch (error) {
@@ -444,7 +440,7 @@ app.put("/updateMonthHeading/:taskId", jsonwebtoken, async (req, res) => {
 
 
 
-// notepad
+
 app.put("/notepadAdd", jsonwebtoken, async (req, res) => {
     try {
         const user = await User.findById(req.payload.id);
@@ -457,10 +453,10 @@ app.put("/notepadAdd", jsonwebtoken, async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Append the text to the existing notePad content
+        
         user.notePad = (user.notePad ? user.notePad + "\n" : "") + text;
 
-        await user.save(); // ✅ Save changes to the database
+        await user.save(); 
 
         res.json({ success: true, message: "Note added successfully!", notePad: user.notePad });
     } catch (error) {
@@ -469,7 +465,7 @@ app.put("/notepadAdd", jsonwebtoken, async (req, res) => {
     }
 });
 
-// ✅ Get Notepad Data
+
 app.get("/notepad", jsonwebtoken, async (req, res) => {
     try {
         if (!req.payload) {
@@ -488,7 +484,7 @@ app.get("/notepad", jsonwebtoken, async (req, res) => {
 });
 
 
-// Graph
+
 app.get("/getGraph/:name", jsonwebtoken, async (req, res) => {
     try {
         if (!req.payload) {
@@ -506,7 +502,7 @@ app.get("/getGraph/:name", jsonwebtoken, async (req, res) => {
             return res.status(404).json({ success: false, message: "Task not found" });
         }
 
-        // Get today's date, start of the week, and start of the month
+        
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
@@ -515,7 +511,7 @@ app.get("/getGraph/:name", jsonwebtoken, async (req, res) => {
 
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        // Function to calculate completion percentage
+        
         const calculateCompletion = (startDate) => {
             const filteredTasks = task.work.filter(w => new Date(w.date) >= startDate);
             const totalTasks = filteredTasks.reduce((acc, w) => acc + w.details.length, 0);
@@ -524,7 +520,7 @@ app.get("/getGraph/:name", jsonwebtoken, async (req, res) => {
             return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
         };
 
-        // Calculate completion percentages
+        
         const todayCompletion = calculateCompletion(today);
         const weekCompletion = calculateCompletion(startOfWeek);
         const monthCompletion = calculateCompletion(startOfMonth);
