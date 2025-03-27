@@ -2,7 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
 const jsonwebtoken = (req, res, next) => {
-    const token = req.cookies?.jwt; // Ensure cookies exist
+    const token = req.cookies?.jwt; 
 
     if (!token) {
         console.log("JWT not found, redirecting...");
@@ -14,7 +14,7 @@ const jsonwebtoken = (req, res, next) => {
         req.payload = data;
         next();
     } catch (err) {
-        console.log("JWT verification failed:", err.message); // Improved error logging
+        console.log("JWT verification failed:", err.message); 
         return res.status(401).json({ redirect: "/" });
     }
 };
