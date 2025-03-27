@@ -233,10 +233,14 @@ app.post("/login", async(req,res) =>{
 
 
 
-app.get("/workDetail/:id", jsonwebtoken, async (req, res) => {
+app.get("/workDetail/:id/:taskName", jsonwebtoken, async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id, taskName } = req.params;
         const { date, month, year } = req.query;
+
+        if (!date || !month || !year) {
+            return res.status(400).json({ message: "Date, month, and year are required." });
+        }
 
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
@@ -245,52 +249,54 @@ app.get("/workDetail/:id", jsonwebtoken, async (req, res) => {
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
         
-        let workDetails = [];
+        let task = user.tasks.onGoing.find(t => t.name === taskName) ||
+                   user.tasks.completed.find(t => t.name === taskName);
 
-        const allTasks = [...user.tasks.onGoing, ...user.tasks.completed];
-        for (const task of allTasks) {
-            const workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
-            if (workEntry) {
-                workDetails = workEntry.details;
-                break; 
-            }
-        }
-        res.json({ work: workDetails });
+        if (!task) return res.status(404).json({ message: "Task not found." });
+
+        
+        const workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
+
+        res.json({
+            success: true,
+            message: workEntry ? "Work found." : "No work found for this date.",
+            work: workEntry ? workEntry.details : []
+        });
+
     } catch (error) {
-        res.status(500).json({ message: "Server error", error });
+        res.status(500).json({ success: false, message: "Server error", error });
     }
 });
 
 app.post("/addTask", jsonwebtoken, async (req, res) => {
     try {
-        const { id, date, month, year, taskText } = req.body;
-
+        const { id, date, month, year, taskText, completed, taskName } = req.body;
         
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
-
-       
-        const task = user.tasks.onGoing.id(id);
-        if (!task) return res.status(404).json({ message: "Task not found" });
 
         
         const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
 
         
+        let task = user.tasks.onGoing.find(t => t.name === taskName) ||
+                   user.tasks.completed.find(t => t.name === taskName);
+
+        if (!task) return res.status(404).json({ message: "Task not found" });
+
+        
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
 
-        if (!workEntry) {
-            workEntry = { date: formattedDate, details: [{ text: taskText, isComplete: false }] };
-            task.work.push(workEntry);
+        if (workEntry) {
+            workEntry.details.push({ text: taskText, isComplete: completed });
         } else {
-            workEntry.details.push({ text: taskText, isComplete: false });
+            task.work.push({ date: formattedDate, details: [{ text: taskText, isComplete: completed }] });
         }
 
         await user.save();
-        res.status(201).json({ message: "Task added successfully", task });
+        res.json({ message: "Task added successfully", task });
 
     } catch (error) {
-        console.error("Error adding task:", error);
         res.status(500).json({ message: "Server error", error });
     }
 });
