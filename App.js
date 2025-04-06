@@ -177,10 +177,13 @@ app.delete("/deleteTask/:id", jsonwebtoken, async (req, res) => {
 
 
 
-app.post("/logout", async(req,res) =>{
-    res.clearCookie("jwt");
-    res.json({ message: "Logged out successfully" });
+app.get("/logout", function(req,res){
+    req.logout(function(err){
+        if(err){return next(err);}
+        res.redirect("/");
+    });
 });
+
 
 app.post("/signup", async(req,res) =>{
     try {
