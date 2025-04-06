@@ -245,8 +245,8 @@ app.get("/workDetail/:id/:taskName", jsonwebtoken, async (req, res) => {
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        
-        const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
+        const paddedDate = String(date).padStart(2, '0');
+        const formattedDate = new Date(`${year}-${monthMap[month]}-${paddedDate}T00:00:00Z`);
 
         
         let task = user.tasks.onGoing.find(t => t.name === taskName) ||
@@ -275,8 +275,8 @@ app.post("/addTask", jsonwebtoken, async (req, res) => {
         const user = await User.findById(req.payload.id);
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        
-        const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
+        const paddedDate = String(date).padStart(2, '0');
+        const formattedDate = new Date(`${year}-${monthMap[month]}-${paddedDate}T00:00:00Z`);
 
         
         let task = user.tasks.onGoing.find(t => t.name === taskName) ||
@@ -312,8 +312,8 @@ app.put("/updateTask", jsonwebtoken, async (req, res) => {
         const task = user.tasks.onGoing.id(id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-        
-        const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
+        const paddedDate = String(date).padStart(2, '0');
+        const formattedDate = new Date(`${year}-${monthMap[month]}-${paddedDate}T00:00:00Z`);
 
         
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
@@ -345,8 +345,8 @@ app.delete("/deleteTask", jsonwebtoken, async (req, res) => {
         const task = user.tasks.onGoing.id(id);
         if (!task) return res.status(404).json({ message: "Task not found" });
 
-       
-        const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
+        const paddedDate = String(date).padStart(2, '0');
+        const formattedDate = new Date(`${year}-${monthMap[month]}-${paddedDate}T00:00:00Z`);
 
        
         let workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
@@ -389,8 +389,8 @@ app.put("/toggleTaskCompletion", jsonwebtoken, async (req, res) => {
             return res.status(404).json({ error: "Task not found." });
         }
 
-       
-        const formattedDate = new Date(`${year}-${monthMap[month]}-${date}T00:00:00Z`);
+        const paddedDate = String(date).padStart(2, '0');
+        const formattedDate = new Date(`${year}-${monthMap[month]}-${paddedDate}T00:00:00Z`);
         
         
         const workEntry = task.work.find(w => w.date.toISOString().split('T')[0] === formattedDate.toISOString().split('T')[0]);
